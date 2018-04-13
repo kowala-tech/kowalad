@@ -3,7 +3,7 @@
 # kowalad
 
 kowalad is an experimental middleware/deamon that simplifies communication with Kowala's blockchains.  
-kowalad is currently an underlying part of the Kowala Oracle - authenticated data feeds.  
+kowalad is currently an underlying part of the Kowala's Oracle - authenticated data feed system.  
 Account management is not covered in this module as we will use an Intel SGX Enclave for key management.
 
 ## Build
