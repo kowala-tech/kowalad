@@ -7,6 +7,8 @@ kowalad is an experimental middleware/deamon that simplifies communication with 
 * Account management is not covered in this module:
   * Oracle: account management is done through an Intel SGX Enclave.
 
+## Build
+
 The project can be used to:
 
 * generate an experimental library which provides a C++ wrapper over a light client node.
