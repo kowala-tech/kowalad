@@ -3,18 +3,15 @@
 # kowalad
 
 kowalad is an experimental middleware/deamon that simplifies communication with Kowala's blockchains.
-
-* Account management is not covered in this module:
-  * Oracle: account management is done through an Intel SGX Enclave.
+kowalad is currently an underlying part of the Kowala Oracle - authenticated data feeds.
+Account management is not covered in this module as we will use an Intel SGX Enclave for key management.
 
 ## Build
 
-The project can be used to:
-
-* generate an experimental library which provides a C++ wrapper over a light client node.
+* Generate an experimental library which provides a C++ wrapper over a light client node.
   * dynamic library - `make kowalad-dynamic`
   * static library - `make kowalad-static`
-* run a standalone server - `make kowalad`
+* Standalone server - `make kowalad`
 
 ## Core Contributors
 
