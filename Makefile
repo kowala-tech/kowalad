@@ -10,11 +10,11 @@ kowalad:
 	@echo "Run \"build/bin/kowalad -h\" to view available commands."
 
 kowalad-static:
-	go build -buildmode=c-shared -gcflags=-shared -asmflags=-shared -installsuffix=_shared -a -o $(GOLIB)/oracle.a ./kcoin/cplusplus
+	go build -buildmode=c-shared -gcflags=-shared -asmflags=-shared -installsuffix=_shared -a -o $(GOLIB)/kowalad.a ./kcoin/cplusplus
 	@echo "Static library generation is over."
 	
 kowalad-dynamic: 
-	go build -buildmode=c-archive -gcflags=-shared -asmflags=-shared -installsuffix=_shared -a -o $(GOLIB)/oracle.so ./kcoin/cplusplus
+	go build -buildmode=c-archive -gcflags=-shared -asmflags=-shared -installsuffix=_shared -a -o $(GOLIB)/kowalad.so ./kcoin/cplusplus
 	@echo "Dynamic library generation is over."
 
 clean:
