@@ -19,4 +19,4 @@ Account management is not covered in this module as we will use an Intel SGX Enc
 
 ## Contact us
 
-Feel free to email us at support@kowala.tech or talk to us on [Gitter](https://gitter.im/kowala-tech/kcoin).
+Feel free to email us at support@kowala.tech or talk to us on [Gitter](https://gitter.im/kowala-tech/lobby).
