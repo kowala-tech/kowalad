@@ -11,7 +11,7 @@ oracled is currently an underlying part of the Kowala's Oracle System. It simpli
                            | +---------+ +---------+ |
                            | |         | |  CRON   | |
                            | |  LIGHT<----+   +    | |  
-  SUBMITS AUTHENTICATED DATA | |  CLIENT | | +--v--+ | | (TLS) REQUESTS DATA  
+SUBMITS AUTHENTICATED DATA | |  CLIENT | | +--v--+ | | (TLS) REQUESTS DATA  
             <-----------------+        | | | SGX +------------------>
                            | |         | | +-----+ | |
                            | +---------+ +---------+ |
