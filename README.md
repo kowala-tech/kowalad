@@ -4,7 +4,7 @@
 
 oracled is currently an underlying part of the Kowala's Oracle System. It simplifies communication with Kowala's blockchain and management of the authenticated data feed system. oracled's architecture is as follows:
 
-<p>
+<div>
                            +---------ORACLED---------+
                            |                         |
                            |                         |
@@ -16,7 +16,7 @@ SUBMITS AUTHENTICATED DATA | |  CLIENT | | +--v--+ | | (TLS) REQUESTS DATA
                            | |         | | +-----+ | |
                            | +---------+ +---------+ |
                            +-------------------------+
-</p>
+</div>
 
 ## Build
 
