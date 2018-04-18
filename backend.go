@@ -1,22 +1,21 @@
-package backend
+package oracled
 
 import (
 	"fmt"
 	"sync"
 
-	"github.com/kowala-tech/kowalad/kcoin/node"
-	"github.com/kowala-tech/kowalad/kcoin/params"
+	"github.com/kowala-tech/kcoin/node"
+	"github.com/kowala-tech/oracled/kcoin/params"
 )
 
 type Backend interface {
-	StartNode(config *params.Config) error
-	StopNode() error
-	Node() *node.Node
+	Start(config *params.Config) error
+	Stop() error
 }
 
 type backend struct {
-	nodeMu sync.Mutex
-	node   *node.Node
+	backendMu sync.Mutex
+	node      *node.Node
 }
 
 // New returns a new backend instance
@@ -27,8 +26,8 @@ func New() *backend {
 }
 
 func (b *backend) StartNode(config *params.Config) error {
-	b.nodeMu.Lock()
-	defer b.nodeMu.Unlock()
+	b.backendMu.Lock()
+	defer b.backendMu.Unlock()
 	return b.startNode(config)
 }
 
@@ -43,13 +42,11 @@ func (b *backend) startNode(config *params.Config) (err error) {
 }
 
 func (b *backend) StopNode() error {
-	b.nodeMu.Lock()
-	defer b.nodeMu.Unlock()
+	b.backendMu.Lock()
+	defer b.backendMu.Unlock()
 	return b.stopNode()
 }
 
 func (b *backend) stopNode() error {
 	return b.node.Stop()
 }
-
-func (b *backend) Node() *node.Node { return b.node }
