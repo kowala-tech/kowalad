@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-
-	"github.com/kowala-tech/kowalad/kcoin/backend"
-	"github.com/kowala-tech/kowalad/kcoin/params"
+	
+	"github.com/kowala-tech/oracled"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,12 +17,12 @@ var (
 )
 
 var (
-	config params.Config
+	config oracled.Config
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "kowalad",
+	Use:   "oracled",
 	Short: "A middleware/deamon that simplifies communication with Kowala's blockchains",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := listenAndServe(cmd, args); err != nil {
@@ -37,7 +36,7 @@ func listenAndServe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	backend := backend.New()
+	backend := oracled.NewBackend()
 	if err := backend.StartNode(&config); err != nil {
 		return err
 	}
@@ -80,7 +79,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kowalad.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oracled.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -100,9 +99,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".kowalad" (without extension).
+		// Search config in home directory with name ".oracled" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".kowalad")
+		viper.SetConfigName(".oracled")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

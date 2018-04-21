@@ -2,7 +2,7 @@
     "targets": [
         {
             "target_name": "addon",
-            "sources": [ "App/module.cpp"]
+            "sources": [ "backend.cc"]
         }
     ]
 }

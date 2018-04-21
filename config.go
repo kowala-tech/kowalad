@@ -13,10 +13,10 @@ const (
 // Config represents the backend config
 type Config struct {
 	// MaxPeers is the maximum number of peers that can be connected.
-	Maxpeers uint64
+	Maxpeers int // needs to be int for compability reasons
 
 	// MaxPendingPeers represents the maximum pending peers that a node has at a time.
-	MaxPendingPeers uint64
+	MaxPendingPeers int // needs to be int for compability reasons
 
 	// NetworkID is the network that the node will join
 	NetworkID uint64

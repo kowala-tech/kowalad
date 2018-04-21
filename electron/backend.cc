@@ -1,14 +1,16 @@
 #include <node_api.h>
-#include "cplusplus/oracle.so"
 
 namespace backend
 {
-
-napi_value Start(){
-    return ""}
-
-napi_value Stop()
+napi_value Method(napi_env env, napi_callback_info args)
 {
+    napi_value greeting;
+    napi_status status;
+
+    status = napi_create_string_utf8(env, "hello", NAPI_AUTO_LENGTH, &greeting);
+    if (status != napi_ok)
+        return nullptr;
+    return greeting;
 }
 
 napi_value init(napi_env env, napi_value exports)
@@ -16,12 +18,15 @@ napi_value init(napi_env env, napi_value exports)
     napi_status status;
     napi_value fn;
 
-    status = napi_create_function(env, nullptr, 0, Start, nullptr, &fn) if (status != napi_ok) return nullptr;
-
-    status = napi_create_function(env, nullptr, 0, Stop, nullptr, &fn) if (status != napi_ok) return nullptr;
-
-    status = napi_set_named_property(env, exports, "backend", fn);
+    status = napi_create_function(env, nullptr, 0, Method, nullptr, &fn);
     if (status != napi_ok)
-        return
+        return nullptr;
+
+    status = napi_set_named_property(env, exports, "hello", fn);
+    if (status != napi_ok)
+        return nullptr;
+    return exports;
 }
+
+NAPI_MODULE(NODE_GYP_MODULE_NAME, init)
 }
