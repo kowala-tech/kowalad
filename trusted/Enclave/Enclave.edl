@@ -1,5 +1,6 @@
 enclave {
     trusted {
+        
         public int generate_random_number(void);
     };
 }

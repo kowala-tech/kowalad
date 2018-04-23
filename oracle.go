@@ -22,6 +22,7 @@ type Oracle interface {
 
 type oracle struct {
 	contract.OracleManagerContract
+	transactor Transactor // send raw transaction
 	node Node
 	scraper Scraper
 	log log.Logger

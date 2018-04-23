@@ -31,7 +31,8 @@ func NewBackend() *backend {
 		enclave: NewEnclave(),
 		log:     log.New("package", "oracled/backend"),
 	}
-	b.oracleManager = NewOracleManager(b.node)
+	b.node.
+		b.oracleManager = NewOracleManager(b.node)
 
 	return b
 }

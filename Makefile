@@ -262,4 +262,5 @@ $(Backend_Lib_Name):
 
 electron: 
 	npm install -g node-gyp
-	node-gyp configure # generate either a Makefile (on Unix platforms) or a vcxproj file (on Windows) in the build/ directory.
+	node-gyp configure
+	node-gyp build

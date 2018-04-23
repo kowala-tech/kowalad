@@ -31,6 +31,7 @@ type Node interface {
 	Start(config *Config) error
 	Stop() error
 	LiteKowalaService() (*kcoin.Kowala, error)
+	Attach()
 }
 
 // liteNode represents the kowala's blockchain gateway
@@ -124,6 +125,10 @@ func (lite *liteNode) LiteKowalaService() (l *kcoin.Kowala, err error) {
 
 func (lite *liteNode) NetworkID() uint64 {
 	return lite.networkID
+}
+
+func (lite *liteNode) Attach() {
+	return lite.Node.Attach()
 }
 
 func getNodeConfig(config *Config) *node.Config {
