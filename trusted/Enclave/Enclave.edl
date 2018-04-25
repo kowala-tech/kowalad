@@ -1,14 +1,9 @@
 enclave {
     trusted {
-        // currency
         public int ecall_currency_value([user_check] uint8_t* raw_tx, [out] size_t* raw_tx_size);
-        
-        // accounts
         public int ecall_create_sealed_account([out, size=sealed_account_size] uint8_t* sealed_account, uint32_t sealed_account_size);
         public int ecall_delete_sealed_account([in, size=sealed_account_size] const uint8_t* sealed_log, uint32_t sealed_account_size);
         public int ecall_select_sealed_account([in, size=sealed_account_size] const uint8_t* sealed_account, uint32_t sealed_account_size);
-        
-        // oracle
         public int ecall_register_oracle([user_check] uint8_t* raw_tx, [out] size_t* raw_tx_size);
         public int ecall_deregister_oracle([user_check] uint8_t* raw_tx, [out] size_t* raw_tx_size);
         public int ecall_redeem_oracle_funds([user_check] uint8_t* raw_tx, [out] size_t* raw_tx_size);
