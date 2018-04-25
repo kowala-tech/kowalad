@@ -74,9 +74,8 @@ else
 	Urts_Library_Name := sgx_urts
 endif
 
-App_Cpp_Files := enclave/App/Enclave.cpp 
-
-App_Include_Paths := -Ienclave/App -I$(SGX_SDK)/include
+App_Cpp_Files := App/App.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp)
+App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -116,9 +115,8 @@ else
 endif
 Crypto_Library_Name := sgx_tcrypto
 
-Enclave_Cpp_Files := enclave/Enclave/Enclave.cpp
-
-Enclave_Include_Paths := -Ienclave/Enclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
+Enclave_Cpp_Files := Enclave/Enclave.cpp $(wildcard Enclave/Edger8rSyntax/*.cpp) $(wildcard Enclave/TrustedLibrary/*.cpp)
+Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx
 
 CC_BELOW_4_9 := $(shell expr "`$(CC) -dumpversion`" \< "4.9")
 ifeq ($(CC_BELOW_4_9), 1)
@@ -149,7 +147,7 @@ Enclave_Cpp_Objects := $(Enclave_Cpp_Files:.cpp=.o)
 
 Enclave_Name := enclave.so
 Signed_Enclave_Name := enclave.signed.so
-Enclave_Config_File := enclave/Enclave/Enclave.config.xml
+Enclave_Config_File := Enclave/Enclave.config.xml
 
 ifeq ($(SGX_MODE), HW)
 ifeq ($(SGX_DEBUG), 1)
@@ -170,9 +168,7 @@ endif
 endif
 
 
-.PHONY: all
-
-all
+.PHONY: all run
 
 ifeq ($(Build_Mode), HW_RELEASE)
 all: .config_$(Build_Mode)_$(SGX_ARCH) $(App_Name) $(Enclave_Name)
@@ -197,70 +193,31 @@ else
 endif
 endif
 
+run: all
+ifneq ($(Build_Mode), HW_RELEASE)
+	@$(CURDIR)/$(App_Name)
+	@echo "RUN  =>  $(App_Name) [$(SGX_MODE)|$(SGX_ARCH), OK]"
+endif
 
 
+######## Enclave Objects ########
 
-
-
-######## Oracle objects ########
-
-oracled:
-	go build -i -o $(GOBIN)/oracled -v -tags '$(BUILD_TAGS)' $(BUILD_FLAGS) ./cmd/oracled
-	@echo "Compilation is over."
-	@echo "Run \"build/bin/oracled -h\" to view available commands."
-
-oracled-cplusplus: 
-	
-
-######## Electron Native Module ########
-
-oracled-electron: oracled-cplusplus
-				
-
-
-.PHONY: clean
-.PHONY: clean
-
-clean: 
-
-
-######## Enclave Library Objects ########
-
-Enclave_Lib_Name=enclave.so
-Enclave_Lib_Cpp_Files := trusted/Library/Enclave.cpp
-Enclave_Lib_Cpp_Objects := $(Library_Cpp_Files:.cpp=.o)
-
-Library/Enclave_u.c: $(SGX_EDGER8R) trusted/Enclave/Enclave.edl
-	# Edger8r with untrusted flag generates Enclave_u.c, Enclave_u.h
-	@cd trusted/Library && $(SGX_EDGER8R) --untrusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
+Enclave/Enclave_t.c: $(SGX_EDGER8R) trusted/Enclave/Enclave.edl
+	@cd trusted/Enclave && $(SGX_EDGER8R) --trusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
 	@echo "GEN  =>  $@"
 
-Library/Enclave_u.o: Library/Enclave_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@
+Enclave/Enclave_t.o: Enclave/Enclave_t.c
+	@$(CC) $(Enclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-Library/%.o: Library/%.cpp
-	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
+Enclave/%.o: Enclave/%.cpp
+	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(Library_Name): Library/Enclave_u.o $(Library_Cpp_Objects)
-	@$(CXX) -shared $^ -o $@ $(App_Link_Flags)
+$(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects)
+	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
-
-######## Backend Library ########
-
-Backend_Lib_Name=backend.so
-
-$(Backend_Lib_Name):
-	go build -buildmode=c-archive -gcflags=-shared -asmflags=-shared -installsuffix=_shared -a -o $@ cplusplus/
-
-
-######## Electron Addon ########
-
-.PHONY: electron
-
-electron: 
-	npm install -g node-gyp
-	node-gyp configure
-	node-gyp build
+$(Signed_Enclave_Name): $(Enclave_Name)
+	@$(SGX_ENCLAVE_SIGNER) sign -key trusted/Enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
+	@echo "SIGN =>  $@"
