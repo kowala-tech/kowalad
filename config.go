@@ -1,4 +1,4 @@
-package oracled
+package kowalad
 
 const (
 	// config defaults
@@ -24,8 +24,8 @@ type Config struct {
 	// DataDir is the default data directory for the oracle executable
 	DataDir string
 
-	// Lite represents lowala lite protocol configuration
-	Lite ProtocolConfig
+	// LightService represents kowala light protocol configuration
+	LightService ProtocolConfig
 }
 
 // ProtocolConfig contains the light client protocol related config
@@ -44,7 +44,7 @@ func NewConfig() *Config {
 		MaxPendingPeers: MaxPendingPeers,
 		NetworkID:       NetworkID,
 		DataDir:         DataDir,
-		Lite: ProtocolConfig{
+		LightService: ProtocolConfig{
 			Enabled:       LiteEnabled,
 			DatabaseCache: LiteDatabaseCache,
 		},

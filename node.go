@@ -1,4 +1,4 @@
-package oracled
+package kowalad
 
 import (
 	"errors"
@@ -9,6 +9,8 @@ import (
 
 	"github.com/kowala-tech/kcoin/kcoin"
 	"github.com/kowala-tech/kcoin/kcoin/downloader"
+	"github.com/kowala-tech/kcoin/kcoinclient"
+	"github.com/kowala-tech/kcoin/log"
 	"github.com/kowala-tech/kcoin/node"
 	"github.com/kowala-tech/kcoin/p2p"
 	"github.com/kowala-tech/kcoin/p2p/nat"
@@ -22,30 +24,30 @@ const (
 
 var (
 	// errors
-	ErrActiveNode              = errors.New("node is already running")
-	ErrInactiveNode            = errors.New("node is not running")
-	ErrLiteRegistrationFailure = errors.New("failed to register the lite protocol")
+	ErrActiveNode               = errors.New("node is already running")
+	ErrInactiveNode             = errors.New("node is not running")
+	ErrLightRegistrationFailure = errors.New("failed to register the light protocol")
 )
 
 type Node interface {
 	Start(config *Config) error
 	Stop() error
-	LiteKowalaService() (*kcoin.Kowala, error)
-	Attach()
+	Client() (*kcoinclient.Client, error)
 }
 
-// liteNode represents the kowala's blockchain gateway
-type liteNode struct {
+// lightNode represents the kowala's blockchain gateway
+type lightNode struct {
 	*node.Node
 	networkID uint64
+	log       log.Logger
 }
 
-func NewLiteNode() *liteNode {
-	return &liteNode{}
+func NewLightNode() *lightNode {
+	return &lightNode{}
 }
 
-func (lite *liteNode) Start(config *Config) error {
-	if lite.isActive() {
+func (ln *lightNode) Start(config *Config) error {
+	if ln.isActive() {
 		return ErrActiveNode
 	}
 
@@ -54,18 +56,18 @@ func (lite *liteNode) Start(config *Config) error {
 		return err
 	}
 
-	lite.Node = kcoinNode
-	lite.networkID = config.NetworkID
+	ln.Node = kcoinNode
+	ln.networkID = config.NetworkID
 
-	return lite.Node.Start()
+	return ln.Node.Start()
 }
 
-func (lite *liteNode) Stop() error {
-	if !lite.isActive() {
+func (ln *lightNode) Stop() error {
+	if !ln.isActive() {
 		return ErrInactiveNode
 	}
 
-	return lite.Node.Stop()
+	return ln.Node.Stop()
 }
 
 func MakeNode(config *Config) (*node.Node, error) {
@@ -83,8 +85,8 @@ func MakeNode(config *Config) (*node.Node, error) {
 		return nil, err
 	}
 
-	if config.Lite.Enabled {
-		if err := registerLiteKowalaService(node, config); err != nil {
+	if config.LightService.Enabled {
+		if err := registerLightKowalaService(node, config); err != nil {
 			return nil, err
 		}
 	}
@@ -92,7 +94,7 @@ func MakeNode(config *Config) (*node.Node, error) {
 	return node, nil
 }
 
-func registerLiteKowalaService(registry *node.Node, config *Config) error {
+func registerLightKowalaService(registry *node.Node, config *Config) error {
 	serviceConfig := &kcoin.DefaultConfig
 	serviceConfig.Genesis = mapNetworkIDToGenesis[config.NetworkID]
 	// @TODO (rgeraldes) - replace with light sync in the future
@@ -102,33 +104,26 @@ func registerLiteKowalaService(registry *node.Node, config *Config) error {
 	if err := registry.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		return kcoin.New(ctx, serviceConfig)
 	}); err != nil {
-		return fmt.Errorf("%v: %v", ErrLiteRegistrationFailure, err)
+		return fmt.Errorf("%v: %v", ErrLightRegistrationFailure, err)
 	}
 
 	return nil
 }
 
-func (lite *liteNode) isActive() bool {
-	if lite.Node == nil || lite.Node.Server() == nil {
+func (ln *lightNode) isActive() bool {
+	if ln.Node == nil || ln.Node.Server() == nil {
 		return false
 	}
 	return true
 }
 
-// @TODO (rgeraldes) - *kcoin.Kowala to be replaced by liteKowalaService
-func (lite *liteNode) LiteKowalaService() (l *kcoin.Kowala, err error) {
-	if err := lite.Node.Service(&l); err != nil {
-		return nil, fmt.Errorf("service unavailable: %v", err)
+func (ln *lightNode) Client() (*kcoinclient.Client, error) {
+	rpcClient, err := ln.Node.Attach()
+	if err != nil {
+		return nil, err
 	}
-	return
-}
 
-func (lite *liteNode) NetworkID() uint64 {
-	return lite.networkID
-}
-
-func (lite *liteNode) Attach() {
-	return lite.Node.Attach()
+	return kcoinclient.NewClient(rpcClient), nil
 }
 
 func getNodeConfig(config *Config) *node.Config {

@@ -3,42 +3,29 @@ package main
 import (
 	"C"
 
-	"github.com/kowala-tech/oracled/"
+	"github.com/kowala-tech/kowalad"
 )
 
 var (
-	api = oracled.NewBackend()
+	api = kowalad.NewAPI()
 )
 
 //export Error
 type Error *C.char
 
 //export StartNode
-func Oracle_StartNode() (C.int, Error) {
-	// @TODO (rgeraldes) - export config ob
-	config := &Config{}
-
-	if err := api.StartNode(config); err != nil {
+func StartNode() (C.int, Error) {
+	if err := api.StartNode(nil); err != nil {
 		return 0, C.CString(err.Error())
 	}
 	return 0, nil
 }
 
-//export Oracle_StopNode
-func Oracle_StopNode() (C.int, Error) {
+//export StopNode
+func StopNode() (C.int, Error) {
 	if err := api.StopNode(); err != nil {
 		return 0, C.CString(err.Error())
 	}
-	return 0, nil
-}
-
-//export Oracle_Start
-func Oracle_Start() (C.int, Error) {
-	return 0, nil
-}
-
-//export Oracle_Stop
-func Oracle_Stop() (C.int, Error) {
 	return 0, nil
 }
 

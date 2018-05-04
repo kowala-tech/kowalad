@@ -1,4 +1,4 @@
-package oracled
+package kowalad
 
 import (
 	"github.com/kowala-tech/kcoin/core"
@@ -31,4 +31,6 @@ func getBootstrapNodesfromNetworkID(networkID uint64) []*discover.Node {
 		}
 		bootNodes = append(bootNodes, node)
 	}
+
+	return bootNodes
 }

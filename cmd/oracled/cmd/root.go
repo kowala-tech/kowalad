@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	
-	"github.com/kowala-tech/oracled"
+
+	"github.com/kowala-tech/kowalad"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,13 +17,13 @@ var (
 )
 
 var (
-	config oracled.Config
+	config kowalad.Config
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "oracled",
-	Short: "A middleware/deamon that simplifies communication with Kowala's blockchains",
+	Use:   "kowalad",
+	Short: "A light node that simplifies communication with Kowala's blockchains",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := listenAndServe(cmd, args); err != nil {
 			os.Exit(1)
@@ -36,7 +36,7 @@ func listenAndServe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	backend := oracled.NewBackend()
+	backend := kowalad.NewBackend()
 	if err := backend.StartNode(&config); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func listenAndServe(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func handleInterruption(backend backend.Backend) <-chan struct{} {
+func handleInterruption(backend kowalad.Backend) <-chan struct{} {
 	doneCh := make(chan struct{})
 	go func() {
 		signalCh := make(chan os.Signal, 1)
@@ -79,7 +79,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oracled.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kowalad.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -99,9 +99,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".oracled" (without extension).
+		// Search config in home directory with name ".kowalad" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".oracled")
+		viper.SetConfigName(".kowalad")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

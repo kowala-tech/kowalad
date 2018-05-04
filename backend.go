@@ -1,38 +1,37 @@
-package oracled
+package kowalad
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/kowala-tech/kcoin/kcoinclient"
 	"github.com/kowala-tech/kcoin/log"
 )
 
-// @TODO (rgeraldes) - add async operations
-// @TODO (rgeraldes) - add mutex
+const (
+	timeout = 300 * time.Second
+)
 
 type Backend interface {
 	StartNode(config *Config) error
-	StopNode()
-	StartOracle() error
-	StopOracle() error
+	StopNode() error
+	SendRawTransaction(data []byte) error
 }
 
-// backend represents the oracle app backend
 type backend struct {
-	config        *Config
-	node          Node
-	enclave       Enclave
-	oracleManager OracleManager
-	log           log.Logger
+	config     *Config
+	node       Node
+	client     *kcoinclient.Client
+	log        log.Logger
+	rpcTimeout time.Duration
 }
 
 func NewBackend() *backend {
 	b := &backend{
-		node:    NewLiteNode(),
-		enclave: NewEnclave(),
-		log:     log.New("package", "oracled/backend"),
+		node: NewLightNode(),
+		log:  log.New("package", "kowalad/backend"),
 	}
-	b.node.
-		b.oracleManager = NewOracleManager(b.node)
 
 	return b
 }
@@ -48,6 +47,13 @@ func (b *backend) startNode(config *Config) (err error) {
 			err = fmt.Errorf("node crashed on start: %v", err)
 		}
 	}()
+
+	b.client, err = b.node.Client()
+	if err != nil {
+		log.Error("Failed to get the client", "err", err)
+		return err
+	}
+
 	return b.node.Start(config)
 }
 
@@ -55,10 +61,8 @@ func (b *backend) StopNode() error {
 	return b.node.Stop()
 }
 
-func (b *backend) StartOracle() {
-	b.oracleManager.Start()
-}
-
-func (b *backend) StopOracle() {
-	b.oracleManager.Stop()
+func (b *backend) SendRawTransaction(data []byte) error {
+	ctx, cancel := context.WithTimeout(context.Background(), b.rpcTimeout)
+	defer cancel()
+	return b.client.SendRawTransaction(ctx, data)
 }
