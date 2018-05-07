@@ -14,3 +14,7 @@ $(Library_Name):
 cplusplus: $(Library_Name)
 
 
+.PHONY: clean
+
+clean: 
+	@rm -f $(Library_Name) *.h
